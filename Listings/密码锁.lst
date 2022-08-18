@@ -1,0 +1,250 @@
+C51 COMPILER V9.59.0.0   ______                                                            08/17/2022 21:46:39 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE ______
+OBJECT MODULE PLACED IN .\Objects\ÃÜÂëËø.obj
+COMPILER INVOKED BY: D:\keli\C51\BIN\C51.EXE ÃÜÂëËø.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\ÃÜÂëË
+                    -ø.lst) TABS(2) OBJECT(.\Objects\ÃÜÂëËø.obj)
+
+line level    source
+
+   1          #include<regx52.h>
+   2          #define uchar unsigned char
+   3          #define uint unsigned int
+   4          uchar code table[]="Enter Password:";
+   5          sbit lcden=P2^7;//Ê¹ÄÜ¶Ë
+   6          sbit lcdrs=P2^6;//Êý¾Ý/ÃüÁîÑ¡Ôñ¶Ë
+   7          sbit lcdwr=P2^5;//¶ÁÐ´Ñ¡ÔñÆ÷
+   8          sbit pwm=P2^0;
+   9          sbit jia=P3^1;
+  10          sbit jan=P3^0;
+  11          uint num;
+  12          void delay(uint xms){
+  13   1        uint i,j;
+  14   1        for(i=xms;i>0;i--){
+  15   2          for(j=110;j>0;j--){}
+  16   2        }
+  17   1      }
+  18          void write_com(uchar com){//Ð´Ö¸Áî
+  19   1        lcdrs=0;
+  20   1        lcdwr=0;
+  21   1        lcden=1;
+  22   1        P0=com;
+  23   1        delay(5);
+  24   1        lcden=0;
+  25   1      }
+  26          void write_date(uchar date){//Ð´Êý¾Ý
+  27   1        lcdrs=1;
+  28   1        lcdwr=0;
+  29   1        P0=date;
+  30   1        delay(10);
+  31   1        lcden=1;
+  32   1        delay(5);
+  33   1        lcden=0;
+  34   1      }
+  35          void init(){//³õÊ¼»¯
+  36   1        write_com(0x38);
+  37   1        write_com(0x0c);
+  38   1        write_com(0x06);
+  39   1        write_com(0x01);
+  40   1      }
+  41          
+  42          #define KEY_MATRIX_PORT P1
+  43          uchar pass[11]={
+  44            '0','1','2','3','4','5','6','7','8','9','*'
+  45          };
+  46          uchar password[5];
+  47          uchar code open[]="12125";
+  48          uchar code error[]="Error";
+  49          uchar code Door[]="Open!";
+  50          uchar key;
+  51          uchar pos=0;
+  52          uchar flag,jd,count;
+  53          uchar key_matrix_ranks_scan(void){
+  54   1        uchar key_value=0;
+C51 COMPILER V9.59.0.0   ______                                                            08/17/2022 21:46:39 PAGE 2   
+
+  55   1        KEY_MATRIX_PORT=0Xf7;
+  56   1        if(KEY_MATRIX_PORT!=0xf7){
+  57   2          delay(100);
+  58   2          switch(KEY_MATRIX_PORT)
+  59   2          {
+  60   3            case 0x77:
+  61   3                key_value=1;
+  62   3                break;
+  63   3            case 0xb7:
+  64   3                key_value=5;
+  65   3                break;
+  66   3            case 0xd7:
+  67   3                key_value=9;
+  68   3                break;
+  69   3            case 0xe7:
+  70   3                key_value=13;
+  71   3                break;
+  72   3          }
+  73   2        }
+  74   1        while(KEY_MATRIX_PORT!=0xf7);
+  75   1        KEY_MATRIX_PORT=0xfb;
+  76   1        if(KEY_MATRIX_PORT!=0xfb){
+  77   2          delay(100);
+  78   2          switch(KEY_MATRIX_PORT){
+  79   3            case 0x7b:
+  80   3              key_value=2;
+  81   3              break;
+  82   3            case 0xbb:
+  83   3              key_value=6;
+  84   3              break;
+  85   3            case 0xdb:
+  86   3              key_value=10;
+  87   3              break;
+  88   3            case 0xeb:
+  89   3              key_value=14;
+  90   3              break;
+  91   3          }
+  92   2        }
+  93   1        while(KEY_MATRIX_PORT!=0xfb);
+  94   1        KEY_MATRIX_PORT=0xfd;
+  95   1        if (KEY_MATRIX_PORT!=0xfd){
+  96   2          delay(100);
+  97   2          switch(KEY_MATRIX_PORT){
+  98   3            case 0x7d:
+  99   3                key_value=3;
+ 100   3                break;
+ 101   3            case 0xbd:
+ 102   3                key_value=7;
+ 103   3                break;
+ 104   3            case 0xdd:
+ 105   3                key_value=11;
+ 106   3                break;
+ 107   3            case 0xed:
+ 108   3                key_value=15;
+ 109   3                break;
+ 110   3          }
+ 111   2        }
+ 112   1        while(KEY_MATRIX_PORT!=0xfd);
+ 113   1        KEY_MATRIX_PORT=0xfe;
+ 114   1        if (KEY_MATRIX_PORT!=0xfe){
+ 115   2          delay(100);
+ 116   2          switch(KEY_MATRIX_PORT){
+C51 COMPILER V9.59.0.0   ______                                                            08/17/2022 21:46:39 PAGE 3   
+
+ 117   3            case 0x7e:
+ 118   3                key_value=4;
+ 119   3                break;
+ 120   3            case 0xbe:
+ 121   3                key_value=8;
+ 122   3                break;
+ 123   3            case 0xde:
+ 124   3                key_value=12;
+ 125   3                break;
+ 126   3            case 0xee:
+ 127   3                key_value=16;
+ 128   3                break;
+ 129   3          }
+ 130   2        }
+ 131   1        while(KEY_MATRIX_PORT!=0xfe);
+ 132   1        return key_value;
+ 133   1      }
+ 134          void Time0(){
+ 135   1        TMOD=0X01;
+ 136   1        TH0=(65536-459)/256;
+ 137   1        TL0=(65536-459)%256;
+ 138   1        EA=1;
+ 139   1        ET0=1;
+ 140   1        TR0=1;
+ 141   1      
+ 142   1      }
+ 143          void Time0_Int() interrupt 1
+ 144          {
+ 145   1        TH0=(65536-459)/256;
+ 146   1        TL0=(65536-459)%256;
+ 147   1        if(count<jd){
+ 148   2          pwm=1;
+ 149   2        }else{
+ 150   2          pwm=0;
+ 151   2        }
+ 152   1        count++;
+ 153   1        if(count>=40){
+ 154   2          count=0;
+ 155   2        }
+ 156   1      }
+ 157          void keyscan(uchar flag){
+ 158   1        if(flag==1){
+ 159   2          delay(10);
+ 160   2          jd=2;
+ 161   2        }
+ 162   1        if(flag==0){
+ 163   2          delay(10);
+ 164   2          jd=5;
+ 165   2        }
+ 166   1      }
+ 167            
+ 168          void main(){
+ 169   1        init();
+ 170   1        write_com(0x80);
+ 171   1        for(num=0;num<15;num++){
+ 172   2          write_date(table[num]);
+ 173   2          delay(5);
+ 174   2        }
+ 175   1        Time0();
+ 176   1        jd=2;
+ 177   1        count=0;
+ 178   1        while(1){
+C51 COMPILER V9.59.0.0   ______                                                            08/17/2022 21:46:39 PAGE 4   
+
+ 179   2            key=key_matrix_ranks_scan();
+ 180   2            if(key!=0){
+ 181   3              write_com(0x80+0x40);
+ 182   3              if(pos<5){
+ 183   4                password[pos]=pass[key-1];
+ 184   4                pos++;
+ 185   4                delay(5);
+ 186   4              }
+ 187   3              for(num=0;num<pos;num++){
+ 188   4                write_date(password[num]);
+ 189   4                delay(5);
+ 190   4              }
+ 191   3              if(pass[key-1]=='*'){
+ 192   4                for(num=0;num<5;num++){
+ 193   5                  if(open[num]==password[num]){
+ 194   6                    flag=1;
+ 195   6                    continue;
+ 196   6                  }else{
+ 197   6                    flag=0;
+ 198   6                    break;
+ 199   6                  }
+ 200   5                }
+ 201   4                if(flag==0){
+ 202   5                  for(num=0;num<5;num++){
+ 203   6                    write_date(error[num]);
+ 204   6                    delay(5);
+ 205   6                  }
+ 206   5                }else{
+ 207   5                    for(num=0;num<5;num++){
+ 208   6                      write_date(Door[num]);
+ 209   6                      delay(5);
+ 210   6                  }
+ 211   5                    delay(100);
+ 212   5                }
+ 213   4                
+ 214   4              }
+ 215   3              
+ 216   3            }
+ 217   2            keyscan(flag);
+ 218   2        }
+ 219   1      }
+ 220          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    720    ----
+   CONSTANT SIZE    =     34    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     23       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
